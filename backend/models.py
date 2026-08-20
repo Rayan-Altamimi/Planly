@@ -60,6 +60,7 @@ class Task(Base):
     recurrence_end_date = Column(Date, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    parent_task_id = Column(Integer, ForeignKey("tasks.id"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="tasks")
