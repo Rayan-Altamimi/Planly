@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import auth, categories, tasks, events
+from routers import auth, categories, tasks, events, reminders
 
 app = FastAPI()
 
@@ -25,7 +25,7 @@ app.include_router(auth.router)
 app.include_router(categories.router)
 app.include_router(tasks.router)
 app.include_router(events.router)
-
+app.include_router(reminders.router)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
