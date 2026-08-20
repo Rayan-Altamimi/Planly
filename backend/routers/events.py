@@ -2,7 +2,7 @@ from typing import Annotated
 from datetime import date, time
 from enum import Enum
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from models import Event, Category
@@ -24,11 +24,11 @@ class EventStatus(str, Enum):
 
 
 class CreateEvent(BaseModel):
-    title: str
-    description: str | None = None
+    title: str = Field(max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
     event_date: date
     event_time: time | None = None
-    location: str | None = None
+    location: str | None = Field(default=None, max_length=200)
     category_id: int | None = None
 
 

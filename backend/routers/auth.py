@@ -1,7 +1,7 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from database import get_db
@@ -11,6 +11,8 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
 from config import SECRET_KEY
 from sqlalchemy import or_
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(
     prefix="/auth",
@@ -22,6 +24,7 @@ ALGORITHM ="HS256"
 db_dependency = Annotated[Session, Depends(get_db)]
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
+limiter = Limiter(key_func=get_remote_address)
 
 
 class CreateUserRequest(BaseModel):
@@ -88,7 +91,8 @@ async def register_user(db: db_dependency, create_user_request: CreateUserReques
     db.commit()
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+@limiter.limit("5/minute")
+async def login_for_access_token(request: Request, form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                                   db: db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:

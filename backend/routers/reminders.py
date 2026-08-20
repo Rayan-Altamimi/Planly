@@ -1,7 +1,7 @@
 from typing import Annotated
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from models import Reminder, Task, Event
@@ -17,7 +17,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 class CreateReminder(BaseModel):
     remind_at: datetime
-    message: str | None = None
+    message: str | None = Field(default=None, max_length=500)
     task_id: int | None = None
     event_id: int | None = None
 
@@ -32,7 +32,7 @@ class CreateReminder(BaseModel):
 
 class UpdateReminder(BaseModel):
     remind_at: datetime
-    message: str | None = None
+    message: str | None = Field(default=None, max_length=500)
 
 
 class ReminderResponse(BaseModel):

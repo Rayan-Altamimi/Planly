@@ -1,7 +1,7 @@
 from typing import Annotated
 from datetime import date, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from models import Task, Category, PriorityEnum, RecurrenceEnum
@@ -16,8 +16,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 class CreateTask(BaseModel):
-    title: str
-    description: str | None = None
+    title: str = Field(max_length=200)
+    description: str | None = Field(default=None, max_length=2000)
     due_date: date | None = None
     priority: PriorityEnum | None = None
     is_recurring: bool = False

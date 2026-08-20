@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from models import Category
@@ -15,9 +15,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 class CreateCategory(BaseModel):
-    name: str
-    color: str | None = None
-
+    name: str = Field(max_length=100)
+    color: str | None = Field(default=None, max_length=20)
 
 class CategoryResponse(BaseModel):
     id: int
