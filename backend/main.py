@@ -9,6 +9,7 @@ from routers import auth, categories, tasks, events, reminders, dashboard
 
 app = FastAPI()
 
+
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -35,6 +36,9 @@ app.include_router(events.router)
 app.include_router(reminders.router)
 app.include_router(dashboard.router)
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
