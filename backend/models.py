@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, Date, Time, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from database import Base
 import enum
@@ -60,13 +60,13 @@ class Task(Base):
     recurrence_end_date = Column(Date, nullable=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    parent_task_id = Column(Integer, ForeignKey("tasks.id"), nullable=True)
+    parent_task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="tasks")
     category = relationship("Category", back_populates="tasks")
     reminders = relationship("Reminder", back_populates="task", cascade="all, delete-orphan")
-
+    instances = relationship("Task", cascade="all, delete-orphan", backref=backref("parent_task", remote_side=[id]))
 
 class Event(Base):
     __tablename__ = "events"

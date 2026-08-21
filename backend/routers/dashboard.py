@@ -23,9 +23,9 @@ class DashboardResponse(BaseModel):
     tasks_completed_today: int
     tasks_total_today: int
     overdue_tasks: list[TaskResponse]
+    no_due_date_tasks: list[TaskResponse]
     upcoming_events: list[EventResponse]
     active_reminders: list[ReminderResponse]
-
 
 priority_order = case(
     (Task.priority == PriorityEnum.high, 0),
@@ -57,6 +57,12 @@ async def get_dashboard(user: user_dependency, db: db_dependency):
         Task.is_completed == False
     ).order_by(priority_order).all()
 
+    no_due_date_tasks = db.query(Task).filter(
+        Task.owner_id == user['id'],
+        Task.due_date.is_(None),
+        Task.is_completed == False
+    ).order_by(priority_order).all()
+
     upcoming_events = db.query(Event).filter(
         Event.owner_id == user['id'],
         Event.event_date >= today,
@@ -74,6 +80,7 @@ async def get_dashboard(user: user_dependency, db: db_dependency):
         tasks_completed_today=tasks_completed_today,
         tasks_total_today=tasks_total_today,
         overdue_tasks=overdue_tasks,
+        no_due_date_tasks=no_due_date_tasks,
         upcoming_events=upcoming_events,
         active_reminders=active_reminders
     )
